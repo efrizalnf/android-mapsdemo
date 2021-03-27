@@ -18,7 +18,10 @@ import java.util.jar.Manifest
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var mMap: GoogleMap
+
+    // Uncommecnt jika tidak menggunakan method isMyLocationEnable = true
     private var locationRequest: LocationRequest? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,31 +83,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        maka set permission
             requestLocationPermission()
         } else {
-            if (locationRequest == null) {
-                locationRequest = LocationRequest.create()
-                locationRequest?.let { locationRequest ->
-                    locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                    locationRequest.interval = 5000
-                    locationRequest.fastestInterval = 1000
+            // Uncommecnt jika tidak menggunakan method isMyLocationEnable = true
+            /* if (locationRequest == null) {
+                 locationRequest = LocationRequest.create()
+                 locationRequest?.let { locationRequest ->
+                     locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                     locationRequest.interval = 5000
+                     locationRequest.fastestInterval = 1000
 
-                    val locationCallback = object : LocationCallback() {
-                        override fun onLocationResult(locationResult: LocationResult) {
-                            getCurrentLocation()
-                        }
-                    }
-                    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-                }
-            }
-
+                     val locationCallback = object : LocationCallback() {
+                         override fun onLocationResult(locationResult: LocationResult) {
+                             getCurrentLocation()
+                         }
+                     }
+                     fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+                 }
+             }*/
+            mMap.isMyLocationEnabled = true
             fusedLocationClient.lastLocation.addOnCompleteListener() {
 //        dapatkan lokasi sesuai lattitude & longitude tampung fusedlocationclient
                 val lokasi = it.result
                 if (lokasi != null) {
                     val latlong = LatLng(lokasi.latitude, lokasi.longitude)
                     Log.d(TAG, "getCurrentLocation: " + lokasi)
-                    mMap.addMarker(
-                            MarkerOptions().position(latlong).title(getString(R.string.app_name))
-                    )
+//                    Uncommecnt jika tidak menggunakan method isMyLocationEnable = true
+                    /*  mMap.clear()
+                      mMap.addMarker(
+                              MarkerOptions().position(latlong).title(getString(R.string.app_name))
+                      )*/
 
                     val update = CameraUpdateFactory.newLatLngZoom(latlong, 15.0f)
                     mMap.moveCamera(update)
