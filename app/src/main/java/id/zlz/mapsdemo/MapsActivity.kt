@@ -4,7 +4,10 @@ import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.internal.ApiExceptionUtil
 import com.google.android.gms.location.*
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -13,6 +16,11 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PointOfInterest
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.PlacesClient
 import java.util.jar.Manifest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -22,6 +30,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     // Uncommecnt jika tidak menggunakan method isMyLocationEnable = true
     private var locationRequest: LocationRequest? = null
 
+    private lateinit var placesClient: PlacesClient
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,13 +40,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        setupLokasiClient()
+        init()
         Log.d(TAG, "onCreate: Running" + setupLokasiClient())
     }
 
-    private fun setupLokasiClient() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        Log.d(TAG, "setupLokasiClient: Running")
+
+    private fun init() {
+        setupLokasiClient()
+        setUpPlacesClient()
     }
 
     /**
@@ -56,25 +67,51 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        val sydney = LatLng(-34.0, 151.0)
 //        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+
+        mMap.setOnPoiClickListener {
+            Toast.makeText(this, it.name, Toast.LENGTH_LONG).show()
+        }
     }
 
-
-    private fun requestLocationPermission() {
-        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION)
-        Log.d(TAG, "requestLocationPermission: Running")
+    private fun setupLokasiClient() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        Log.d(TAG, "setupLokasiClient: Running")
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == REQUEST_LOCATION) {
-            if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getCurrentLocation()
-            } else {
-                Log.e(TAG, "LOKASI PERMISSION DITOLAk")
+    private fun setUpPlacesClient() {
+        Places.initialize(applicationContext, getString(R.string.google_maps_key))
+        placesClient = Places.createClient(this)
+        Log.d(TAG, "setUpPlacesClient: Running")
+    }
+
+    private fun displayPoi(pointOfInterest: PointOfInterest) {
+        val placeId = pointOfInterest.placeId
+
+        val placeFields = listOf(
+                Place.Field.ID,
+                Place.Field.NAME,
+                Place.Field.ADDRESS,
+                Place.Field.PHONE_NUMBER,
+                Place.Field.RATING,
+                Place.Field.PHOTO_METADATAS,
+                Place.Field.LAT_LNG
+                )
+
+        val requestMapsPlace = FetchPlaceRequest.builder(placeId, placeFields)
+                .build()
+
+        placesClient.fetchPlace(requestMapsPlace).addOnSuccessListener { response ->
+            val place = response.place
+            Toast.makeText(this, "${place.name}" + "${place.address}" + "${place.latLng}", Toast.LENGTH_LONG).show()
+
+        }.addOnFailureListener{
+            exception ->
+            if (exception is ApiException){
+                val statusCode = exception.statusCode
             }
         }
-        Log.d(TAG, "onRequestPermissionsResult: Running")
-    }
 
+    }
 
     private fun getCurrentLocation() {
         Log.d(TAG, "getCurrentLocation: Running")
@@ -118,10 +155,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 } else {
 //        Log E
                     Log.e(TAG, "Lokasi tidak ditemukan ")
-
                 }
             }
         }
+    }
+
+    private fun requestLocationPermission() {
+        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION)
+        Log.d(TAG, "requestLocationPermission: Running")
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == REQUEST_LOCATION) {
+            if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getCurrentLocation()
+            } else {
+                Log.e(TAG, "LOKASI PERMISSION DITOLAk")
+            }
+        }
+        Log.d(TAG, "onRequestPermissionsResult: Running")
     }
 
     companion object {
