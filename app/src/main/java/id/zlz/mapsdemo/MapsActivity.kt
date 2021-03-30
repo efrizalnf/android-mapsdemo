@@ -69,7 +69,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
 
         mMap.setOnPoiClickListener {
-            Toast.makeText(this, it.name, Toast.LENGTH_LONG).show()
+//            Toast.makeText(this, it.name, Toast.LENGTH_LONG).show()
+            displayPoi(it)
+            Log.d(TAG, "onPoiClicklistener: Run ")
         }
     }
 
@@ -90,27 +92,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val placeFields = listOf(
                 Place.Field.ID,
                 Place.Field.NAME,
-                Place.Field.ADDRESS,
                 Place.Field.PHONE_NUMBER,
-                Place.Field.RATING,
                 Place.Field.PHOTO_METADATAS,
+                Place.Field.ADDRESS,
                 Place.Field.LAT_LNG
-                )
+        )
 
-        val requestMapsPlace = FetchPlaceRequest.builder(placeId, placeFields)
-                .build()
+        val requestMapsPlace = FetchPlaceRequest.builder(placeId, placeFields).build()
 
         placesClient.fetchPlace(requestMapsPlace).addOnSuccessListener { response ->
             val place = response.place
-            Toast.makeText(this, "${place.name}" + "${place.address}" + "${place.latLng}", Toast.LENGTH_LONG).show()
-
-        }.addOnFailureListener{
-            exception ->
-            if (exception is ApiException){
+            Toast.makeText(this, "${place.name}," + "${place.phoneNumber}," + "${place.address}," + "${place.latLng}" , Toast.LENGTH_LONG).show()
+        }.addOnFailureListener { exception ->
+            if (exception is ApiException) {
                 val statusCode = exception.statusCode
+                Log.e(TAG, "displayPoi: Not found" + exception.message +"Statuscode :" +statusCode )
             }
         }
-
     }
 
     private fun getCurrentLocation() {
@@ -138,7 +136,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
              }*/
             mMap.isMyLocationEnabled = true
             fusedLocationClient.lastLocation.addOnCompleteListener() {
-//        dapatkan lokasi sesuai lattitude & longitude tampung fusedlocationclient
+
+                /**   dapatkan lokasi sesuai lattitude & longitude tampung fusedlocationclient*/
                 val lokasi = it.result
                 if (lokasi != null) {
                     val latlong = LatLng(lokasi.latitude, lokasi.longitude)
