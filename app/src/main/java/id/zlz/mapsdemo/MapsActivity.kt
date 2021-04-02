@@ -1,24 +1,28 @@
 package id.zlz.mapsdemo
 
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.createBitmap
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.internal.ApiExceptionUtil
 import com.google.android.gms.location.*
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PointOfInterest
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.PhotoMetadata
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import java.util.jar.Manifest
@@ -70,6 +74,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.setOnPoiClickListener {
 //            Toast.makeText(this, it.name, Toast.LENGTH_LONG).show()
+            /** Error*/
             displayPoi(it)
             Log.d(TAG, "onPoiClicklistener: Run ")
         }
@@ -87,6 +92,58 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun displayPoi(pointOfInterest: PointOfInterest) {
+        displayPoiGetPlaceStep(pointOfInterest)
+
+    }
+
+    private fun displayPoiDisplayStep(place: Place, photo:Bitmap?){
+        val iconPhoto = if (photo == null){
+            BitmapDescriptorFactory.defaultMarker()
+        }else {
+            BitmapDescriptorFactory.fromBitmap(photo)
+        }
+
+        mMap.addMarker(MarkerOptions()
+                .position(place.latLng as LatLng)
+                .icon(iconPhoto)
+                .title(place.name)
+                .snippet(place.phoneNumber)
+        )
+    }
+
+
+    private fun displayPoiGetPhotoStep(place: Place) {
+        /*get Array photo metadata*/
+        val photoMetadata = place.photoMetadatas?.get(0)
+
+        if (photoMetadata == null) {
+            return
+        }
+
+        /*fetch photo , and resize*/
+        val photoRequest = FetchPhotoRequest.builder(photoMetadata as PhotoMetadata)
+                .setMaxHeight(resources.getDimensionPixelSize(R.dimen.default_image_height))
+                .setMaxWidth(resources.getDimensionPixelSize(R.dimen.default_image_width))
+                .build()
+
+        /*handle callback*/
+        placesClient.fetchPhoto(photoRequest)
+                .addOnSuccessListener {
+                    photoresponses ->
+                    val bitmap = photoresponses.bitmap
+                    displayPoiDisplayStep(place, bitmap)
+                }
+                .addOnFailureListener{
+                    failureresponses ->
+                    if (failureresponses is ApiException){
+                        val statusCodes = failureresponses.statusCode
+                        Log.e(TAG, "displayPoiGetPhotoStep: " + failureresponses.message +"StatusCode :" + statusCodes )
+                    }
+
+                }
+    }
+
+    private fun displayPoiGetPlaceStep(pointOfInterest: PointOfInterest) {
         val placeId = pointOfInterest.placeId
 
         val placeFields = listOf(
@@ -102,11 +159,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         placesClient.fetchPlace(requestMapsPlace).addOnSuccessListener { response ->
             val place = response.place
-            Toast.makeText(this, "${place.name}," + "${place.phoneNumber}," + "${place.address}," + "${place.latLng}" , Toast.LENGTH_LONG).show()
+            displayPoiGetPhotoStep(place)
+//            Toast.makeText(this, "${place.name}," + "${place.phoneNumber}," + "${place.address}," + "${place.latLng}", Toast.LENGTH_LONG).show()
         }.addOnFailureListener { exception ->
             if (exception is ApiException) {
                 val statusCode = exception.statusCode
-                Log.e(TAG, "displayPoi: Not found" + exception.message +"Statuscode :" +statusCode )
+                Log.e(TAG, "displayPoi: Not found" + exception.message + "Statuscode :" + statusCode)
             }
         }
     }
