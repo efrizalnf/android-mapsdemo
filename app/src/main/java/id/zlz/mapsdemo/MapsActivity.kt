@@ -25,6 +25,7 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import id.zlz.mapsdemo.adapter.BookmarkInfoWindowsAdapter
 import java.util.jar.Manifest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -74,10 +75,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.setOnPoiClickListener {
 //            Toast.makeText(this, it.name, Toast.LENGTH_LONG).show()
-            /** Error*/
             displayPoi(it)
             Log.d(TAG, "onPoiClicklistener: Run ")
         }
+
+        mMap.setInfoWindowAdapter(BookmarkInfoWindowsAdapter(this))
     }
 
     private fun setupLokasiClient() {
@@ -96,6 +98,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
+    /**
+     * Add a place marker
+     * */
     private fun displayPoiDisplayStep(place: Place, photo:Bitmap?){
         val iconPhoto = if (photo == null){
             BitmapDescriptorFactory.defaultMarker()
@@ -103,12 +108,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             BitmapDescriptorFactory.fromBitmap(photo)
         }
 
-        mMap.addMarker(MarkerOptions()
+        val marker = mMap.addMarker(MarkerOptions()
                 .position(place.latLng as LatLng)
-                .icon(iconPhoto)
+                /*Dihilangkan setelah membuat windows adapter untuk menmiplkan Imge masing2*/
+//                .icon(iconPhoto)
                 .title(place.name)
                 .snippet(place.phoneNumber)
         )
+        marker?.tag = photo
+
     }
 
 
