@@ -32,7 +32,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var mMap: GoogleMap
 
-    // Uncommecnt jika tidak menggunakan method isMyLocationEnable = true
+    // Uncomment jika tidak menggunakan method isMyLocationEnable = true
     private var locationRequest: LocationRequest? = null
 
     private lateinit var placesClient: PlacesClient
