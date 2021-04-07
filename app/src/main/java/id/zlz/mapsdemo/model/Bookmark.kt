@@ -16,6 +16,4 @@ class Bookmark {
         var longitude: Double? = 0.0,
         var phone:String = ""
     )
-
-
 }
