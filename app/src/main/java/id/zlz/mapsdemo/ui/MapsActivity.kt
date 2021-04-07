@@ -1,13 +1,11 @@
-package id.zlz.mapsdemo
+package id.zlz.mapsdemo.ui
 
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.graphics.createBitmap
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.*
 
@@ -25,8 +23,8 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import id.zlz.mapsdemo.R
 import id.zlz.mapsdemo.adapter.BookmarkInfoWindowsAdapter
-import java.util.jar.Manifest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
