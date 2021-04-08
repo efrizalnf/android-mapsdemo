@@ -3,5 +3,5 @@
 ANDROID MAPS DEMO = w/KOTLIN
 
 - Implemented SharedPrefference
-- Implemented Room
+- Implemented Room w/DAO
 - Implemented Maps API
