@@ -8,6 +8,7 @@ import android.widget.TextView
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
 import id.zlz.mapsdemo.R
+import id.zlz.mapsdemo.ui.MapsActivity
 
 class BookmarkInfoWindowsAdapter(context: Activity) : GoogleMap.InfoWindowAdapter {
     private val contents: View
@@ -21,16 +22,16 @@ class BookmarkInfoWindowsAdapter(context: Activity) : GoogleMap.InfoWindowAdapte
     }
 
 
-    override fun getInfoContents(p0: Marker?): View? {
+    override fun getInfoContents(p0: Marker): View? {
         val title = contents.findViewById<TextView>(R.id.tv_title)
-        title.text = p0?.title ?: ""
+        title.text = p0.title ?: ""
 
         val datacontent = contents.findViewById<TextView>(R.id.tv_content)
-        datacontent.text = p0?.snippet ?: ""
+        datacontent.text = p0.snippet ?: ""
 
         val image = contents.findViewById<ImageView>(R.id.iv_place)
-        image.setImageBitmap(p0?.tag as Bitmap?)
-
+//        image.setImageBitmap(p0?.tag as Bitmap?)
+            image.setImageBitmap((p0.tag as MapsActivity.PlaceInfo).image)
         return contents
     }
 

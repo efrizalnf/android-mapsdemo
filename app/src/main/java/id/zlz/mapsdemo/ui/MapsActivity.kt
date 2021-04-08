@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.*
 
@@ -25,6 +27,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import id.zlz.mapsdemo.R
 import id.zlz.mapsdemo.adapter.BookmarkInfoWindowsAdapter
+import id.zlz.mapsdemo.viewmodel.MapsViewModel
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -35,6 +38,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var placesClient: PlacesClient
 
+    private lateinit var mapsViewModel: MapsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,19 +69,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         getCurrentLocation()
+        setupMapListener()
+        setUpMapsViewModel()
+    }
+
+    private fun setupMapListener() {
+
         Log.d(TAG, "onMapReady: Running")
         // Add a marker in Sydney and move the camera
-//        val sydney = LatLng(-34.0, 151.0)
-//        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-
+        //        val sydney = LatLng(-34.0, 151.0)
+        //        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+        //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
         mMap.setOnPoiClickListener {
-//            Toast.makeText(this, it.name, Toast.LENGTH_LONG).show()
+    //            Toast.makeText(this, it.name, Toast.LENGTH_LONG).show()
             displayPoi(it)
             Log.d(TAG, "onPoiClicklistener: Run ")
         }
 
         mMap.setInfoWindowAdapter(BookmarkInfoWindowsAdapter(this))
+    }
+
+    private fun setUpMapsViewModel(){
+        mapsViewModel = ViewModelProviders.of(this).get(MapsViewModel::class.java)
     }
 
     private fun setupLokasiClient() {
@@ -113,8 +126,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .title(place.name)
                 .snippet(place.phoneNumber)
         )
-        marker?.tag = photo
-
+//        marker?.tag = photo
+        marker?.tag = PlaceInfo(place, photo)
     }
 
 
@@ -243,5 +256,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         private const val REQUEST_LOCATION = 1
         private const val TAG: String = "MapsActivity"
     }
+
+    class PlaceInfo (val place:Place? = null, val image:Bitmap? = null)
 
 }
