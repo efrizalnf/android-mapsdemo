@@ -9,7 +9,7 @@ abstract class PlaceDatabase : RoomDatabase() {
     abstract fun bookmarkDao(): BookmarkDao
     companion object {
         private var instance: PlaceDatabase? = null
-        fun getInstance(context: Context): PlaceDatabase {
+        fun getInstance(context:Context ): PlaceDatabase {
             if (instance == null) {
                 instance = Room.databaseBuilder(context.applicationContext, PlaceDatabase::class.java, "Place").build()
             }

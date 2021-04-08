@@ -5,8 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy.IGNORE
 import androidx.room.OnConflictStrategy.REPLACE
 import androidx.room.Query
-import androidx.room.parser.QueryType
-import com.google.common.net.HttpHeaders.FROM
 import id.zlz.mapsdemo.model.Bookmark
 
 @Dao
@@ -21,7 +19,7 @@ interface BookmarkDao {
     fun loadLiveBookmark(bookmarkId: Long): LiveData<Bookmark>
 
     @Insert(onConflict = IGNORE)
-    fun insertBookmark(bookmark: Bookmark): Long
+    fun insertBookmark(bookmark: Bookmark.Bookmark): Long
     
     @Insert(onConflict = REPLACE)
     fun updateBookmark(bookmark: Bookmark)
