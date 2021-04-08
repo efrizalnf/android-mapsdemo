@@ -20,8 +20,8 @@ class BookmarkRepo(context: Context) {
 
     //    Create data
 
-    fun createBookmark(): Bookmark {
-        return Bookmark()
+    fun createBookmark(): Bookmark.Bookmark {
+        return Bookmark.Bookmark()
     }
 
     //    load data
